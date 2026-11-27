@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Полевой экзамен</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: бодрый полевой тренажёр, коротко и по делу
+   IDEA: армейская фляга, которая наполняется водой за каждый верный ответ
+   PICTURE: большая фляга рядом с карточкой вопроса
+   COLOUR and TYPE: песочный фон, тёмно-коричневые чернила, сигнальный оранжевый, синяя вода; Russo One + PT Sans
+   LAYOUT: шапка, затем фляга и карточка в одну линию, на телефоне одна колонка */
+:root{color-scheme:light dark;
+--bg:light-dark(#efe5cf,#1c1913);--ink:light-dark(#2a2318,#f1e9d8);--mut:light-dark(#6b5d45,#b9ab90);
+--card:light-dark(#fffaf0,#29251c);--line:light-dark(#d5c6a4,#4a4232);--acc:light-dark(#c9531d,#ef7a40);
+--water:light-dark(#2a74ad,#5aa6e0);--ok:light-dark(#2f7a3a,#6cc27a);--bad:light-dark(#b3302a,#ee6b62);
+--okbg:light-dark(#e3f1e2,#1f3322);--badbg:light-dark(#f8e1de,#3a201d);--flask:light-dark(#7a6a48,#8f7f5c)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "PT Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,.ttl{font-family:"Russo One","PT Sans",sans-serif;font-weight:400;line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,5vw,46px)}h2{font-size:clamp(22px,3vw,28px)}
+.band{padding:clamp(22px,4vw,48px) max(5vw,16px)}
+.top{background:var(--ink);color:var(--bg);padding-block:18px}
+.top .in{max-width:1100px;margin:auto;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+.top small{opacity:.8;font-size:15px}
+main{max-width:1100px;margin:auto;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+.side{position:sticky;top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tm{border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;background:var(--card);transition:border-color .3s,transform .3s}
+.tm.on{border-color:var(--c);transform:scale(1.04);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.tm svg{width:100%;max-width:90px;height:auto;display:block;margin:auto}
+.tm .lv{transition:transform .7s ease}
+.tm b{display:block;font:22px "Russo One",sans-serif}
+.tm span{font-size:14px;color:var(--mut)}
+.tm .nm{color:var(--c);font-weight:700;font-size:15px}
+.turn{display:inline-block;color:#fff;border-radius:10px;padding:6px 14px;font:18px "Russo One",sans-serif;margin-bottom:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{border:2px solid var(--line);background:var(--bg);padding:8px 18px;font-weight:700}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.lbl{font-weight:700;margin:18px 0 0}
+.mode.on{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 30%,transparent)}
+table.res{width:100%;border-collapse:collapse;margin-top:12px}
+.res td{padding:10px 8px;border-bottom:1px solid var(--line)}.res td:last-child{text-align:right;font:20px "Russo One",sans-serif;white-space:nowrap}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px)}
+.meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--mut);font-size:15px;margin-bottom:12px}
+.tag{background:var(--acc);color:#fff;border-radius:99px;padding:2px 12px;font-weight:700}
+.tag.w{background:var(--water)}
+.q{font-size:clamp(19px,2.4vw,23px);font-weight:700;margin:4px 0 18px}
+.opts{display:grid;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer;border-radius:12px;min-height:48px}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.opt{background:var(--bg);border:2px solid var(--line);text-align:left;padding:12px 16px}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.tf{grid-template-columns:1fr 1fr}.tf .opt{text-align:center;font-weight:700;font-size:19px}
+.main{background:var(--acc);color:#fff;border:0;padding:12px 26px;font-weight:700;font-size:18px}
+.ghost{background:none;border:2px solid var(--line);padding:10px 18px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.srt{display:grid;gap:10px}
+.it{border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.it.ok{border-color:var(--ok);background:var(--okbg)}.it.bad{border-color:var(--bad);background:var(--badbg)}
+.it p{margin:0 0 8px;font-weight:700}
+.bins{display:flex;gap:6px;flex-wrap:wrap}
+.bin{border:2px solid var(--line);background:var(--card);padding:6px 12px;font-size:15px;min-height:44px}
+.bin.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:12px;border-left:6px solid var(--ok);background:var(--okbg)}
+.fb.bad{border-color:var(--bad);background:var(--badbg)}
+.fb b{display:block;margin-bottom:4px}
+.miss{display:grid;gap:10px;margin:14px 0 0;padding:0;list-style:none}
+.miss li{border-left:4px solid var(--bad);padding:6px 12px;background:var(--bg);border-radius:0 10px 10px 0;font-size:16px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px}
+.mode{border:2px solid var(--line);background:var(--bg);padding:16px;text-align:left;min-height:110px}
+.mode:hover{border-color:var(--acc)}
+.mode .ttl{font-size:20px;display:block;margin-bottom:6px}
+.mode span{color:var(--mut);font-size:15px}
+.rank{font:clamp(30px,5vw,44px)/1.05 "Russo One",sans-serif;color:var(--acc);margin:6px 0}
+.foot{max-width:1100px;margin:auto;color:var(--mut);font-size:14px;padding-top:0}
+@media(max-width:700px){main{grid-template-columns:1fr}.side{position:static;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.tm{padding:6px 4px}.tm svg{max-width:46px}.tm b{font-size:18px}.tm span{display:none}}
+@media(prefers-reduced-motion:reduce){.tm .lv,.tm{transition:none}}
+</style>
+</head>
+<body>
+<header class="band top"><div class="in"><h1>Полевой экзамен</h1><small>Питание и питьевая вода военнослужащих в полевых условиях</small></div></header>
+<div class="band">
+<main>
+  <aside class="side" id="board" aria-label="Фляги команд"></aside>
+  <section class="card" id="app" aria-live="polite"></section>
+</main>
+</div>
+<p class="band foot">Нормативы воды приведены по СанПиН 2.1.4.1074-01 «Питьевая вода», который используется в учебниках гигиены. Вопросы собираются случайно, поэтому каждый раунд новый. Играйте с одного экрана: команды отвечают по очереди.</p>
+<script>
+{
+let N=10;
+const TEAMS=[['Альфа','#d9622b'],['Браво','#2a74ad'],['Чарли','#8b5cb8'],['Дельта','#2f8a6e']];
+const CFG={topic:'all',teams:2,per:5};
+const PAIRS=[
+ {t:'food',qT:'Какой метод или термин подходит к описанию?',qD:'Что означает «{x}»?',p:[
+  ['Расчётный метод','оценка фактического питания по меню-раскладке и таблицам химического состава продуктов'],
+  ['Весовой метод','взвешивание продуктов при закладке в котёл и готовых порций'],
+  ['Лабораторный метод','химический анализ суточного рациона в лаборатории'],
+  ['Анкетно-опросный метод','опрос военнослужащих о съеденной за сутки пище'],
+  ['Соматометрия','измерение роста, массы тела и окружностей тела'],
+  ['Физиометрия','измерение ЖЕЛ (спирометрия) и силы мышц кисти (динамометрия)'],
+  ['Калиперометрия','измерение толщины кожно-жировой складки'],
+  ['Снятие пробы (бракераж)','органолептическая оценка готовой пищи перед раздачей'],
+  ['С-витаминизация','добавление аскорбиновой кислоты в готовые первые или третьи блюда непосредственно перед раздачей'],
+  ['Суточная проба','образцы всех блюд, которые хранят 48 часов на случай расследования пищевого отравления'],
+  ['Пищевой статус','состояние организма, сложившееся под влиянием фактического питания'],
+  ['Индекс массы тела','масса тела в килограммах, делённая на квадрат роста в метрах']]},
+ {t:'food',qT:'Дефицит какого витамина даёт этот признак?',qD:'Какой признак характерен для дефицита: {x}?',p:[
+  ['Витамин C','кровоточивость и разрыхлённость дёсен'],
+  ['Витамин B2','заеды в углах рта (ангулярный стоматит) и хейлоз'],
+  ['Витамин PP','глоссит, дерматит, диарея'],
+  ['Витамин A','ухудшение сумеречного зрения и сухость кожи'],
+  ['Витамин D','нарушение минерализации костей и зубов']]},
+ {t:'water',qT:'Какой метод подходит к описанию?',qD:'Что означает «{x}»?',p:[
+  ['Осветление','удаление взвешенных частиц: отстаивание, коагуляция, фильтрация'],
+  ['Обесцвечивание','устранение цветности воды'],
+  ['Обеззараживание','уничтожение патогенных микроорганизмов'],
+  ['Коагуляция','укрупнение мелкой взвеси с помощью сульфата алюминия'],
+  ['Гиперхлорирование','обработка большими дозами хлора с последующим дехлорированием'],
+  ['Дехлорирование','удаление избытка хлора тиосульфатом натрия или активированным углём'],
+  ['Опреснение','снижение солесодержания воды'],
+  ['Дезактивация','удаление радиоактивных веществ из воды'],
+  ['Детоксикация','удаление отравляющих и ядовитых веществ из воды'],
+  ['Хлорпоглощаемость','количество хлора, израсходованное на окисление веществ в воде'],
+  ['Остаточный хлор','хлор, оставшийся в воде после обеззараживания; показатель его надёжности'],
+  ['Фторирование','добавление фтора при его недостатке для профилактики кариеса'],
+  ['Дефторирование','снижение избытка фтора для профилактики флюороза']]},
+ {t:'water',qT:'Какой термин подходит к описанию?',qD:'Что означает «{x}»?',p:[
+  ['Санитарно-эпидемиологическая разведка','обследование водоисточника до начала его использования войсками'],
+  ['Пункт водоснабжения','оборудованное место добычи, очистки, хранения и раздачи воды'],
+  ['Пантоцид, Аквасепт','таблетки для индивидуального обеззараживания воды во фляге'],
+  ['Межпластовые подземные воды','самый надёжный по качеству источник водоснабжения']]},
+ {t:'water',qT:'Какое вещество в воде на это указывает?',qD:'О чём говорит повышенное содержание в воде: {x}?',p:[
+  ['Аммиак','свежее органическое загрязнение'],
+  ['Нитриты','загрязнение произошло относительно недавно'],
+  ['Нитраты','давнее загрязнение, минерализация органики завершена'],
+  ['Колиформные бактерии','фекальное загрязнение воды']]}
+];
+const NUM=[
+ ['water','Остаточный свободный хлор через 30 минут после хлорирования','от 0,3 до 0,5 мг/л',['от 0,01 до 0,05 мг/л','от 1,5 до 2 мг/л','от 5 до 10 мг/л'],'Меньше: обеззараживание ненадёжно. Больше: вода неприятна на вкус и запах.'],
+ ['water','Минимальное время контакта хлора с водой при обычном хлорировании','30 минут',['5 минут','3 часа','сутки']],
+ ['water','Доза активного хлора при гиперхлорировании','от 10 до 20 мг/л',['от 0,1 до 0,3 мг/л','от 0,5 до 1 мг/л','от 100 до 200 мг/л'],'После обработки избыток хлора удаляют дехлорированием.'],
+ ['water','Мутность питьевой воды','не более 1,5 мг/л по каолину',['не более 5 мг/л по каолину','не более 15 мг/л по каолину','не более 0,1 мг/л по каолину']],
+ ['water','Цветность питьевой воды','не более 20 градусов',['не более 5 градусов','не более 60 градусов','не более 100 градусов']],
+ ['water','Запах и привкус питьевой воды','не более 2 баллов',['ровно 0 баллов','не более 4 баллов','не более 5 баллов']],
+ ['water','Водородный показатель (pH) питьевой воды','от 6 до 9',['от 3 до 5','от 9 до 11','строго 7']],
+ ['water','Общая жёсткость питьевой воды','не более 7 мг-экв/л',['не более 1 мг-экв/л','не более 20 мг-экв/л','не более 35 мг-экв/л']],
+ ['water','Нитраты в питьевой воде','не более 45 мг/л',['не более 5 мг/л','не более 150 мг/л','не более 450 мг/л']],
+ ['water','Сухой остаток (минерализация) питьевой воды','не более 1000 мг/л',['не более 100 мг/л','не более 5000 мг/л','не более 10000 мг/л']],
+ ['water','Оптимальное содержание фтора для профилактики кариеса','от 0,7 до 1,5 мг/л',['от 0,05 до 0,1 мг/л','от 3 до 5 мг/л','от 10 до 15 мг/л'],'Ниже 0,5 мг/л растёт риск кариеса, выше 1,5 мг/л развивается флюороз.'],
+ ['water','Общие колиформные бактерии в питьевой воде','отсутствие в 100 мл',['не более 10 в 1 мл','не более 100 в 1 л','не нормируются']],
+ ['water','Общее микробное число питьевой воды','не более 50 КОЕ в 1 мл',['не более 5000 КОЕ в 1 мл','не более 500 КОЕ в 1 мл','не нормируется']],
+ ['water','Прозрачность воды по шрифту Снеллена','не менее 30 см',['не менее 3 см','не менее 10 см','не менее 1 см']],
+ ['food','Нормальный индекс массы тела по ВОЗ','от 18,5 до 24,9 кг/м²',['от 10 до 15 кг/м²','от 25 до 29,9 кг/м²','от 30 до 35 кг/м²'],'От 25 до 29,9 кг/м² это избыточная масса тела.'],
+ ['food','Температура первых блюд при раздаче','не ниже 75 °C',['не ниже 40 °C','не ниже 55 °C','не ниже 95 °C']],
+ ['food','Температура вторых блюд и гарниров при раздаче','не ниже 65 °C',['не ниже 30 °C','не ниже 45 °C','не ниже 90 °C']],
+ ['food','Срок хранения суточной пробы','48 часов',['6 часов','12 часов','7 суток']],
+ ['food','Условия хранения суточной пробы','в холодильнике от +2 до +6 °C',['при комнатной температуре','в тёплом шкафу при +37 °C','на раздаточном столе']]
+];
+const SORT=[
+ ['water','Распредели методы улучшения качества воды',['Основные','Специальные'],[['Осветление',0],['Обесцвечивание',0],['Обеззараживание',0],['Опреснение',1],['Дезактивация',1],['Детоксикация',1],['Умягчение',1],['Обезжелезивание',1],['Фторирование',1],['Дефторирование',1],['Дезодорация',1]]],
+ ['water','Распредели способы обеззараживания воды',['Химические','Физические'],[['Хлорирование',0],['Озонирование',0],['Ионы серебра',0],['Йодирование',0],['Кипячение',1],['УФ-облучение',1],['Ультразвук',1]]],
+ ['water','Распредели показатели качества воды',['Органолептические','Химические','Микробные'],[['Запах',0],['Привкус',0],['Цветность',0],['Мутность',0],['Жёсткость',1],['Нитраты',1],['Фтор',1],['pH',1],['Колиформные бактерии',2],['Общее микробное число',2]]],
+ ['food','Распредели методы оценки питания',['Фактическое питание','Пищевой статус'],[['Расчётный по меню-раскладке',0],['Весовой',0],['Лабораторный анализ рациона',0],['Анкетно-опросный',0],['Соматометрия',1],['Физиометрия',1],['Клинический осмотр',1],['Биохимия крови и мочи',1],['Калиперометрия',1]]],
+ ['food','Распредели показатели пищевого статуса',['Соматометрия','Физиометрия','Клиника и биохимия'],[['Рост',0],['Масса тела',0],['Кожно-жировая складка',0],['ЖЕЛ',1],['Динамометрия',1],['Кровоточивость дёсен',2],['Гемоглобин',2],['Витамин C в моче',2]]]
+];
+const RANKS=[[0,'Рядовой'],[4,'Ефрейтор'],[6,'Сержант'],[8,'Лейтенант'],[10,'Капитан']];
+const $=s=>document.querySelector(s),app=$('#app');
+const r=n=>Math.floor(Math.random()*n),pick=a=>a[r(a.length)];
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=r(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+let S={};
+const flask=c=>'<svg viewBox="0 0 140 190" aria-hidden="true"><defs><clipPath id="cl'+c+'"><path d="M28 62 Q20 70 20 92 V158 Q20 178 44 178 H96 Q120 178 120 158 V92 Q120 70 112 62 Z"/></clipPath></defs>'+
+ '<rect x="56" y="10" width="28" height="16" rx="4" fill="var(--ink)"/><rect x="60" y="26" width="20" height="20" fill="var(--flask)"/><path d="M50 46 H90 L112 62 H28 Z" fill="var(--flask)"/>'+
+ '<path d="M28 62 Q20 70 20 92 V158 Q20 178 44 178 H96 Q120 178 120 158 V92 Q120 70 112 62 Z" fill="var(--card)" stroke="var(--flask)" stroke-width="5"/>'+
+ '<g clip-path="url(#cl'+c+')"><g class="lv" style="transform:translateY(120px)"><path d="M0 62 Q35 54 70 62 T140 62 V200 H0 Z" fill="var(--c)" opacity=".85"/><path d="M0 66 Q35 60 70 66 T140 66" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="3"/></g></g>'+
+ '<path d="M36 80 V150" stroke="#fff" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/></svg>';
+const ok=t=>S.topic==='all'||S.topic===t;
+
+function genPair(tf){
+  const g=pick(PAIRS.filter(x=>ok(x.t))),[term,def]=pick(g.p),others=g.p.filter(p=>p[0]!==term);
+  const exp=term+': '+def+'.';
+  if(tf){const truth=Math.random()<.5,d=truth?def:pick(others)[1];
+    return {k:'tf',t:g.t,key:'tp'+term,q:term+': '+d+'.',ans:truth,exp}}
+  const ds=shuf(others).slice(0,3);
+  if(Math.random()<.5) return {k:'ch',t:g.t,key:'p'+term,q:g.qT+'<br><i>'+esc(cap(def))+'</i>',opts:shuf([term,...ds.map(x=>x[0])]),ans:term,exp};
+  return {k:'ch',t:g.t,key:'p'+term,q:esc(g.qD.replace('{x}',term)),opts:shuf([def,...ds.map(x=>x[1])]).map(cap),ans:cap(def),exp};
+}
+function genNum(tf){
+  const [t,q,a,w,note]=pick(NUM.filter(x=>ok(x[0]))),exp=q+': '+a+'.'+(note?' '+note:'');
+  if(tf){const truth=Math.random()<.5;return {k:'tf',t,key:'tn'+q,q:q+': '+(truth?a:pick(w))+'.',ans:truth,exp}}
+  return {k:'ch',t,key:'n'+q,q:esc(q)+'?',opts:shuf([a,...w]),ans:a,exp};
+}
+function genSortTF(){
+  const [t,,bins,items]=pick(SORT.filter(x=>ok(x[0]))),[name,b]=pick(items),truth=Math.random()<.5;
+  const shown=truth?b:pick(bins.map((_,i)=>i).filter(i=>i!==b));
+  return {k:'tf',t,key:'ts'+name,q:'«'+name+'» относится к группе «'+bins[shown]+'».',ans:truth,exp:name+': группа «'+bins[b]+'».'};
+}
+function genSort(){
+  const [t,title,bins,items]=pick(SORT.filter(x=>ok(x[0])));let set;
+  do{set=shuf(items).slice(0,4)}while(new Set(set.map(x=>x[1])).size<2);
+  return {k:'sort',t,key:'s'+title+set.map(x=>x[0]).join(),q:title,bins,items:set,exp:set.map(x=>x[0]+': '+bins[x[1]]).join('; ')+'.'};
+}
+function gen(i){
+  const f=i%5===4?genSort:pick([()=>genPair(0),()=>genPair(0),()=>genNum(0),()=>genPair(1),()=>genNum(1),genSortTF]);
+  return f();
+}
+function newRound(){
+  N=CFG.teams*CFG.per;
+  S={topic:CFG.topic,i:0,miss:[],qs:[],used:new Set(),teams:TEAMS.slice(0,CFG.teams).map(([name,c])=>({name,c,score:0,streak:0}))};
+  let guard=0;
+  while(S.qs.length<N&&guard++<5000){const q=gen(Math.floor(S.qs.length/CFG.teams));if(!S.used.has(q.key)||guard>3000){S.used.add(q.key);S.qs.push(q)}}
+  $('#board').innerHTML=S.teams.map((t,k)=>'<div class="tm" id="tm'+k+'" style="--c:'+t.c+'"><div class="nm">'+t.name+'</div>'+flask(k)+'<b>0</b><span>серия 0</span></div>').join('');
+  stats();show();
+}
+const cur=()=>S.teams[S.i%S.teams.length];
+function stats(){
+  if(!S.teams){$('#board').innerHTML='';return}
+  S.teams.forEach((t,k)=>{const el=$('#tm'+k);if(!el)return;
+    el.querySelector('b').textContent=t.score;el.querySelector('span').textContent='серия '+t.streak;
+    el.querySelector('.lv').style.transform='translateY('+(120-t.score/CFG.per*118)+'px)';
+    el.classList.toggle('on',S.i<N&&k===S.i%S.teams.length)});
+}
+const tagOf=t=>t==='water'?'<span class="tag w">Вода</span>':'<span class="tag">Питание</span>';
+function show(){
+  const q=S.qs[S.i];let body='';
+  if(q.k==='ch') body='<div class="opts">'+q.opts.map((o,i)=>'<button class="opt" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div>';
+  if(q.k==='tf') body='<div class="opts tf"><button class="opt" data-v="1">Верно</button><button class="opt" data-v="0">Неверно</button></div>';
+  if(q.k==='sort'){S.pick=q.items.map(()=>-1);
+    body='<div class="srt">'+q.items.map((it,j)=>'<div class="it" id="it'+j+'"><p>'+esc(it[0])+'</p><div class="bins">'+q.bins.map((b,k)=>'<button class="bin" data-j="'+j+'" data-k="'+k+'">'+esc(b)+'</button>').join('')+'</div></div>').join('')+'</div><div class="row"><button class="main" id="chk" disabled>Проверить</button></div>';}
+  const tm=cur();
+  app.innerHTML='<div class="turn" style="background:'+tm.c+'">Отвечает команда «'+tm.name+'»</div><div class="meta"><span>Вопрос '+(Math.floor(S.i/S.teams.length)+1)+' из '+CFG.per+' для команды</span>'+tagOf(q.t)+'</div><div class="q">'+(q.k==='tf'?'Верно или неверно?<br><i>'+esc(q.q)+'</i>':q.k==='sort'?esc(q.q):q.q)+'</div>'+body+'<div id="fb"></div>';
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b));
+  app.querySelectorAll('.bin').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;S.pick[j]=+b.dataset.k;
+    app.querySelectorAll('.bin[data-j="'+j+'"]').forEach(x=>x.classList.toggle('on',x===b));
+    $('#chk').disabled=S.pick.includes(-1)});
+  const c=$('#chk');if(c)c.onclick=()=>answer(null);
+  const f=app.querySelector('button');if(f)f.focus({preventScroll:true});
+}
+function answer(btn){
+  const q=S.qs[S.i];let right;
+  if(q.k==='ch'){right=q.opts[+btn.dataset.i]===q.ans;
+    app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(q.opts[+b.dataset.i]===q.ans)b.classList.add('ok')});if(!right)btn.classList.add('bad')}
+  if(q.k==='tf'){right=(btn.dataset.v==='1')===q.ans;
+    app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if((b.dataset.v==='1')===q.ans)b.classList.add('ok')});if(!right)btn.classList.add('bad')}
+  if(q.k==='sort'){right=q.items.every((it,j)=>S.pick[j]===it[1]);
+    q.items.forEach((it,j)=>$('#it'+j).classList.add(S.pick[j]===it[1]?'ok':'bad'));
+    app.querySelectorAll('.bin').forEach(b=>b.disabled=true);$('#chk').remove()}
+  const tm=cur();
+  if(right){tm.score++;tm.streak++}else{tm.streak=0;S.miss.push(q.exp)}
+  stats();
+  const nxt=S.i<N-1?'Ход команды «'+S.teams[(S.i+1)%S.teams.length].name+'»':'Итоги';
+  $('#fb').innerHTML='<div class="fb'+(right?'':' bad')+'"><b>'+(right?pick(['Точно в цель, «'+tm.name+'»!','Так держать!','Верно, бойцы.']):'Не совсем.')+'</b>'+esc(q.exp)+'</div><div class="row"><button class="main" id="nx">'+esc(nxt)+'</button></div>';
+  $('#nx').onclick=()=>{S.i++;S.i<N?show():finish()};$('#nx').focus({preventScroll:true});
+}
+function finish(){
+  stats();
+  const sorted=S.teams.slice().sort((a,b)=>b.score-a.score),top=sorted[0].score,win=sorted.filter(t=>t.score===top);
+  const rankOf=s=>RANKS.filter(x=>Math.round(s/CFG.per*10)>=x[0]).pop()[1];
+  app.innerHTML='<div class="meta"><span>Раунд завершён</span></div><h2>'+(win.length>1?'Ничья: '+win.map(t=>'«'+t.name+'»').join(', ').replace(/, ([^,]*)$/,' и $1'):'Победила команда «'+win[0].name+'»')+'</h2>'+
+   '<table class="res">'+sorted.map(t=>'<tr><td><b style="color:'+t.c+'">'+t.name+'</b><br><span style="color:var(--mut);font-size:15px">'+rankOf(t.score)+'</span></td><td>'+t.score+' из '+CFG.per+'</td></tr>').join('')+'</table>'+
+   (S.miss.length?'<p>Повторите эти факты:</p><ul class="miss">'+S.miss.map(m=>'<li>'+esc(m)+'</li>').join('')+'</ul>':'<p>Ни одной ошибки. Все фляги полные.</p>')+
+   '<div class="row"><button class="main" id="again">Реванш</button><button class="ghost" id="menu">Настройки</button></div>';
+  $('#again').onclick=newRound;$('#menu').onclick=menu;
+}
+function menu(){
+  S={};stats();
+  const chips=(key,vals,suf)=>'<div class="chips">'+vals.map(v=>'<button class="chip'+(CFG[key]===v?' on':'')+'" data-key="'+key+'" data-v="'+v+'">'+v+suf+'</button>').join('')+'</div>';
+  app.innerHTML='<h2>Командная игра</h2><p style="color:var(--mut);margin:8px 0 0">Команды отвечают по очереди с одного экрана. Всё делается нажатием: выбор ответа, «верно или неверно» и сортировка по группам. Каждый верный ответ наполняет флягу команды.</p>'+
+   '<p class="lbl">Тема</p><div class="modes">'+
+   [['food','Питание','Методы оценки фактического питания и пищевого статуса, контроль готовой пищи'],['water','Питьевая вода','Улучшение качества воды, хлорирование, нормативы и показатели загрязнения'],['all','Общий зачёт','Вопросы по обеим темам вперемешку']]
+   .map(m=>'<button class="mode'+(CFG.topic===m[0]?' on':'')+'" data-t="'+m[0]+'"><span class="ttl">'+m[1]+'</span><span>'+m[2]+'</span></button>').join('')+'</div>'+
+   '<p class="lbl">Сколько команд</p>'+chips('teams',[2,3,4],'')+
+   '<p class="lbl">Вопросов на каждую команду</p>'+chips('per',[3,5,7,10],'')+
+   '<div class="row"><button class="main" id="go">В бой</button></div>';
+  app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{CFG.topic=b.dataset.t;menu()});
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{CFG[b.dataset.key]=+b.dataset.v;menu()});
+  $('#go').onclick=newRound;
+}
+menu();
+}
+</script>
+</body>
+</html>
