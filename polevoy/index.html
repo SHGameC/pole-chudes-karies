@@ -12,12 +12,16 @@
    PICTURE: большая фляга рядом с карточкой вопроса
    COLOUR and TYPE: песочный фон, тёмно-коричневые чернила, сигнальный оранжевый, синяя вода; Russo One + PT Sans
    LAYOUT: шапка, затем фляга и карточка в одну линию, на телефоне одна колонка */
-:root{color-scheme:light dark;
---bg:light-dark(#efe5cf,#1c1913);--ink:light-dark(#2a2318,#f1e9d8);--mut:light-dark(#6b5d45,#b9ab90);
---card:light-dark(#fffaf0,#29251c);--line:light-dark(#d5c6a4,#4a4232);--acc:light-dark(#c9531d,#ef7a40);
---water:light-dark(#2a74ad,#5aa6e0);--ok:light-dark(#2f7a3a,#6cc27a);--bad:light-dark(#b3302a,#ee6b62);
---okbg:light-dark(#e3f1e2,#1f3322);--badbg:light-dark(#f8e1de,#3a201d);--flask:light-dark(#7a6a48,#8f7f5c)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root{color-scheme:light;
+--bg:#efe5cf;--ink:#2a2318;--mut:#6b5d45;--card:#fffaf0;--line:#b9a77f;--acc:#c9531d;
+--water:#2a74ad;--ok:#2f7a3a;--bad:#b3302a;--okbg:#e3f1e2;--badbg:#f8e1de;--flask:#7a6a48}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;
+--bg:#1c1913;--ink:#f1e9d8;--mut:#b9ab90;--card:#29251c;--line:#5a5040;--acc:#ef7a40;
+--water:#5aa6e0;--ok:#6cc27a;--bad:#ee6b62;--okbg:#1f3322;--badbg:#3a201d;--flask:#8f7f5c}}
+:root[data-theme=dark]{color-scheme:dark;
+--bg:#1c1913;--ink:#f1e9d8;--mut:#b9ab90;--card:#29251c;--line:#5a5040;--acc:#ef7a40;
+--water:#5aa6e0;--ok:#6cc27a;--bad:#ee6b62;--okbg:#1f3322;--badbg:#3a201d;--flask:#8f7f5c}
+main.solo{grid-template-columns:1fr;max-width:900px}main.solo .side{display:none}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "PT Sans",system-ui,sans-serif;overflow-x:clip}
 h1,h2,.ttl{font-family:"Russo One","PT Sans",sans-serif;font-weight:400;line-height:1.05;text-wrap:balance;margin:0}
@@ -29,7 +33,7 @@ h1{font-size:clamp(30px,5vw,46px)}h2{font-size:clamp(22px,3vw,28px)}
 main{max-width:1100px;margin:auto;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
 .side{position:sticky;top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .tm{border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;background:var(--card);transition:border-color .3s,transform .3s}
-.tm.on{border-color:var(--c);transform:scale(1.04);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.tm.on{border-color:var(--c);transform:scale(1.04);box-shadow:0 0 0 3px var(--c)}
 .tm svg{width:100%;max-width:90px;height:auto;display:block;margin:auto}
 .tm .lv{transition:transform .7s ease}
 .tm b{display:block;font:22px "Russo One",sans-serif}
@@ -40,7 +44,7 @@ main{max-width:1100px;margin:auto;display:grid;grid-template-columns:minmax(0,26
 .chip{border:2px solid var(--line);background:var(--bg);padding:8px 18px;font-weight:700}
 .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .lbl{font-weight:700;margin:18px 0 0}
-.mode.on{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 30%,transparent)}
+.mode.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 table.res{width:100%;border-collapse:collapse;margin-top:12px}
 .res td{padding:10px 8px;border-bottom:1px solid var(--line)}.res td:last-child{text-align:right;font:20px "Russo One",sans-serif;white-space:nowrap}
 .card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:clamp(18px,3vw,32px)}
@@ -221,6 +225,7 @@ function newRound(){
 }
 const cur=()=>S.teams[S.i%S.teams.length];
 function stats(){
+  document.querySelector('main').classList.toggle('solo',!S.teams);
   if(!S.teams){$('#board').innerHTML='';return}
   S.teams.forEach((t,k)=>{const el=$('#tm'+k);if(!el)return;
     el.querySelector('b').textContent=t.score;el.querySelector('span').textContent='серия '+t.streak;
